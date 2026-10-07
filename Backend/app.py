@@ -3,7 +3,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 from pymongo import MongoClient
-import bcrypt
+from routes.auth import auth_bp
 import os
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
@@ -28,6 +28,8 @@ jwt = JWTManager(app)
 client = MongoClient(MONGO_URI)
 db = client[DATABASE_NAME]
 users_collection = db["users"]
+
+app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
 @app.route("/")
 def home():
@@ -57,3 +59,4 @@ def auth():
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
+    
