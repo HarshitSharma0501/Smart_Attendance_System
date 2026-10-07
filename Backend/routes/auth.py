@@ -1,3 +1,4 @@
+from flask_jwt_extended import create_access_token
 from flask import Blueprint, request, jsonify
 import bcrypt
 
@@ -58,3 +59,52 @@ def register():
         "status": "success",
         "message": "User registered successfully"
     }), 201
+
+@auth_bp.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({
+            "status": "error",
+            "message": "Email and password are required"
+        }), 400
+
+    users_collection = get_users_collection()
+
+    user = users_collection.find_one({
+        "email": email
+    })
+
+    if not user:
+        return jsonify({
+            "status": "error",
+            "message": "Invalid email or password"
+        }), 401
+
+    if not bcrypt.checkpw(
+        password.encode("utf-8"),
+        user["password"].encode("utf-8")
+    ):
+        return jsonify({
+            "status": "error",
+            "message": "Invalid email or password"
+        }), 401
+
+    access_token = create_access_token(
+        identity=str(user["_id"])
+    )
+
+    return jsonify({
+        "status": "success",
+        "message": "Login successful",
+        "access_token": access_token,
+        "user": {
+            "name": user["name"],
+            "email": user["email"],
+            "role": user["role"]
+        }
+    }), 200
