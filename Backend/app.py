@@ -1,9 +1,11 @@
+
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from routes.auth import auth_bp
+from routes.students import students_bp
 import os
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
@@ -30,12 +32,15 @@ db = client[DATABASE_NAME]
 users_collection = db["users"]
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
+app.register_blueprint(students_bp)
+
 
 @app.route("/")
 def home():
     return jsonify({
         "message": "Smart Attendance API Running"
     })
+
 
 @app.route("/api/health")
 def health():
@@ -51,12 +56,13 @@ def health():
             "message": str(e)
         }), 500
 
+
 @app.route("/api/auth")
 def auth():
     return jsonify({
         "message": "Authentication API Running"
     })
 
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
-    

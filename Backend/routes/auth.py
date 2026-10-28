@@ -115,8 +115,9 @@ def login():
         }), 401
 
     access_token = create_access_token(
-        identity=str(user["_id"])
-    )
+    identity=str(user["_id"]),
+    additional_claims={"role": user["role"]}
+)
 
     return jsonify({
         "status": "success",
